@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم - الرائد RSG</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Cairo', sans-serif; }
+    :root {
+      --orange: #F47B20;
+      --orange-light: #F5A623;
+      --orange-dark: #D4681A;
+      --dark: #1A1A1A;
+      --dark-2: #222222;
+    }
+    .gradient-bg { background: linear-gradient(135deg, #F47B20, #F5A623); }
+    .gradient-text {
+      background: linear-gradient(135deg, #F47B20, #F5A623);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* Login card glow */
+    .login-card {
+      box-shadow: 0 25px 60px rgba(244,123,32,0.15), 0 8px 20px rgba(0,0,0,0.08);
+    }
+    /* Spinner */
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Sidebar active */
+    .tab-active {
+      background: linear-gradient(135deg, #F47B20, #F5A623) !important;
+      color: white !important;
+      box-shadow: 0 4px 15px rgba(244,123,32,0.35);
+    }
+    /* Table row hover */
+    tr:hover td { background: rgba(244,123,32,0.03); }
+    /* Badge */
+    .badge-available { background:#dcfce7; color:#16a34a; }
+    .badge-unavailable { background:#fee2e2; color:#dc2626; }
+    /* Progress bar */
+    #progress-bar { transition: width 0.3s ease; }
+    /* Input focus */
+    input:focus, select:focus, textarea:focus {
+      border-color: #F47B20 !important;
+      box-shadow: 0 0 0 3px rgba(244,123,32,0.1);
+    }
+    /* Checkbox accent */
+    input[type=checkbox] { accent-color: #F47B20; }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #F47B20; border-radius: 3px; }
+    /* Card hover */
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(244,123,32,0.15); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="login-page" class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);">
+  <!-- خلفية شبكية -->
+  <div style="position:fixed;inset:0;background-image:linear-gradient(rgba(244,123,32,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,123,32,0.05) 1px,transparent 1px);background-size:50px 50px;pointer-events:none"></div>
+
+  <div class="login-card bg-white rounded-3xl p-8 w-full max-w-sm relative z-10">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg" style="box-shadow:0 8px 25px rgba(244,123,32,0.4)">
+        <span class="text-white font-black text-2xl">ر</span>
+      </div>
+      <h1 class="text-2xl font-black text-gray-800">لوحة التحكم</h1>
+      <p class="text-sm mt-1" style="color:#F47B20;font-weight:700">شركة الرائد RSG</p>
+    </div>
+
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm font-bold text-gray-600 mb-1 block">البريد الإلكتروني</label>
+        <input id="email-input" type="email" placeholder="admin@raed-rsg.com"
+          class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-gray-800 font-bold focus:outline-none transition" />
+      </div>
+      <div>
+        <label class="text-sm font-bold text-gray-600 mb-1 block">كلمة المرور</label>
+        <input id="password-input" type="password" placeholder="••••••••"
+          class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 text-gray-800 font-bold focus:outline-none transition" />
+      </div>
+    </div>
+
+    <p id="login-error" class="text-red-500 text-sm mt-3 hidden text-center font-bold">⚠️ الإيميل أو كلمة المرور خاطئة!</p>
+
+    <div id="login-loading" class="hidden text-center mt-3">
+      <div class="inline-block w-6 h-6 border-2 border-orange-200 border-t-orange-500 rounded-full spin"></div>
+    </div>
+
+    <button onclick="login()"
+      class="w-full gradient-bg text-white font-black py-3 rounded-2xl mt-5 transition hover:opacity-90 active:scale-95"
+      style="box-shadow:0 8px 25px rgba(244,123,32,0.35)">
+      دخول إلى لوحة التحكم
+    </button>
+
+    <p class="text-center text-xs text-gray-400 mt-4">شركة الرائد RSG للإلكترونيات والتكنولوجيا</p>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="admin-page" class="hidden min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-white sticky top-0 z-30 border-b border-gray-100" style="box-shadow:0 2px 20px rgba(0,0,0,0.06)">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center" style="box-shadow:0 4px 15px rgba(244,123,32,0.3)">
+          <span class="text-white font-black text-lg">ر</span>
+        </div>
+        <div>
+          <div class="font-black text-gray-800 text-base leading-tight">لوحة التحكم</div>
+          <div class="text-xs font-bold" style="color:#F47B20">الرائد RSG</div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <a href="index.html" target="_blank"
+          class="text-sm font-bold px-4 py-2 rounded-xl transition flex items-center gap-1"
+          style="background:rgba(244,123,32,0.08);color:#F47B20">
+          👁️ الموقع
+        </a>
+        <a href="store.html" target="_blank"
+          class="text-sm font-bold px-4 py-2 rounded-xl transition flex items-center gap-1"
+          style="background:rgba(244,123,32,0.08);color:#F47B20">
+          🛒 المتجر
+        </a>
+        <button onclick="logout()"
+          class="text-sm font-bold px-4 py-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition">
+          خروج
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 pt-6 pb-16">
+
+    <!-- STATS ROW -->
+    <div id="stats-row" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card bg-white rounded-2xl p-5 border border-gray-100">
+        <div class="text-3xl mb-1">📦</div>
+        <div id="stat-products" class="text-2xl font-black text-gray-800">—</div>
+        <div class="text-sm text-gray-500 font-bold">إجمالي المنتجات</div>
+      </div>
+      <div class="stat-card bg-white rounded-2xl p-5 border border-gray-100">
+        <div class="text-3xl mb-1">✅</div>
+        <div id="stat-available" class="text-2xl font-black" style="color:#F47B20">—</div>
+        <div class="text-sm text-gray-500 font-bold">منتجات متوفرة</div>
+      </div>
+      <div class="stat-card bg-white rounded-2xl p-5 border border-gray-100">
+        <div class="text-3xl mb-1">📂</div>
+        <div id="stat-cats" class="text-2xl font-black text-gray-800">—</div>
+        <div class="text-sm text-gray-500 font-bold">الأقسام</div>
+      </div>
+      <div class="stat-card bg-white rounded-2xl p-5 border border-gray-100">
+        <div class="text-3xl mb-1">❌</div>
+        <div id="stat-unavailable" class="text-2xl font-black text-red-500">—</div>
+        <div class="text-sm text-gray-500 font-bold">غير متوفر</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex gap-3 mb-6">
+      <button onclick="showTab('products')" id="tab-products"
+        class="tab-btn tab-active px-6 py-2.5 rounded-xl font-bold text-sm transition">
+        📦 المنتجات
+      </button>
+      <button onclick="showTab('categories')" id="tab-categories"
+        class="tab-btn px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border-2 border-gray-200 transition">
+        📂 الأقسام
+      </button>
+    </div>
+
+    <!-- ===== PRODUCTS TAB ===== -->
+    <div id="tab-products-content">
+
+      <!-- FORM -->
+      <div class="bg-white rounded-3xl p-6 mb-6 border border-gray-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 id="form-title" class="text-xl font-black text-gray-800">➕ إضافة منتج جديد</h2>
+          <div class="w-8 h-1 rounded-full gradient-bg"></div>
+        </div>
+
+        <input type="hidden" id="edit-product-id" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">اسم المنتج *</label>
+            <input id="p-name" type="text" placeholder="مثال: كاميرا Hikvision 4K"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">السعر (₪) *</label>
+            <input id="p-price" type="number" placeholder="مثال: 350"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">القسم *</label>
+            <select id="p-category"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition bg-white">
+              <option value="">اختر القسم</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">صورة المنتج</label>
+            <div class="flex gap-2 mb-2">
+              <button type="button" onclick="document.getElementById('p-image-gallery').click()"
+                class="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1">
+                🖼️ من المعرض
+              </button>
+              <button type="button" onclick="document.getElementById('p-image-camera').click()"
+                class="flex-1 border-2 rounded-2xl px-3 py-2.5 text-sm font-bold transition flex items-center justify-center gap-1"
+                style="border-color:#F5A623;color:#F47B20">
+                📷 تصوير
+              </button>
+            </div>
+            <input id="p-image-gallery" type="file" accept="image/*" class="hidden" onchange="handleImageSelect(this)" />
+            <input id="p-image-camera" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelect(this)" />
+            <input id="p-image" type="file" accept="image/*" class="hidden" />
+            <input id="p-image-url" type="hidden" />
+            <div id="p-image-preview" class="hidden mt-2 relative">
+              <img id="p-image-preview-img" src="" class="w-full h-36 object-cover rounded-2xl border-2" style="border-color:#F47B20" />
+              <button type="button" onclick="clearImagePreview()"
+                class="absolute top-2 left-2 bg-red-500 text-white rounded-full w-7 h-7 text-xs font-black flex items-center justify-center">✕</button>
+              <p id="p-image-size-info" class="text-xs text-gray-400 mt-1 text-center"></p>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-sm font-bold text-gray-600 mb-1 block">الوصف</label>
+            <textarea id="p-desc" rows="3" placeholder="وصف المنتج، المواصفات، الضمان..."
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition resize-none"></textarea>
+          </div>
+          <div class="flex items-center gap-3">
+            <input id="p-available" type="checkbox" checked class="w-5 h-5" />
+            <label class="font-bold text-gray-700">متوفر للبيع</label>
+          </div>
+        </div>
+
+        <div id="upload-progress" class="hidden mb-3">
+          <div class="bg-gray-200 rounded-full h-2">
+            <div id="progress-bar" class="gradient-bg h-2 rounded-full" style="width:0%"></div>
+          </div>
+          <p class="text-sm text-gray-500 mt-1 text-center">جاري رفع الصورة...</p>
+        </div>
+
+        <p id="form-error" class="text-red-500 text-sm mb-3 hidden font-bold"></p>
+
+        <div class="flex gap-3">
+          <button onclick="saveProduct()"
+            class="flex-1 gradient-bg text-white font-black py-3 rounded-2xl transition hover:opacity-90"
+            style="box-shadow:0 4px 15px rgba(244,123,32,0.3)">
+            💾 حفظ المنتج
+          </button>
+          <button onclick="resetProductForm()"
+            class="px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-2xl transition">
+            إلغاء
+          </button>
+        </div>
+      </div>
+
+      <!-- PRODUCTS TABLE -->
+      <div class="bg-white rounded-3xl p-6 border border-gray-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-black text-gray-800">📦 جميع المنتجات</h2>
+          <!-- بحث سريع -->
+          <input id="table-search" type="text" placeholder="🔍 بحث..."
+            oninput="filterTable(this.value)"
+            class="border-2 border-gray-200 rounded-xl px-4 py-2 text-sm font-bold focus:outline-none transition w-48"
+            style="focus:border-color:#F47B20" />
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b-2 border-gray-100">
+                <th class="text-right text-sm font-bold text-gray-400 pb-3 pr-2">الصورة</th>
+                <th class="text-right text-sm font-bold text-gray-400 pb-3">الاسم</th>
+                <th class="text-right text-sm font-bold text-gray-400 pb-3">السعر</th>
+                <th class="text-right text-sm font-bold text-gray-400 pb-3">القسم</th>
+                <th class="text-right text-sm font-bold text-gray-400 pb-3">الحالة</th>
+                <th class="text-right text-sm font-bold text-gray-400 pb-3">خيارات</th>
+              </tr>
+            </thead>
+            <tbody id="products-table"></tbody>
+          </table>
+          <div id="products-loading" class="text-center py-10 text-gray-400">
+            <div class="inline-block w-8 h-8 border-2 border-orange-200 border-t-orange-500 rounded-full spin mb-2"></div>
+            <p>جاري التحميل...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CATEGORIES TAB ===== -->
+    <div id="tab-categories-content" class="hidden">
+
+      <!-- FORM -->
+      <div class="bg-white rounded-3xl p-6 mb-6 border border-gray-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-black text-gray-800">➕ إضافة قسم جديد</h2>
+          <div class="w-8 h-1 rounded-full gradient-bg"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">اسم القسم *</label>
+            <input id="c-name" type="text" placeholder="مثال: كاميرات مراقبة"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">صورة القسم</label>
+            <div class="flex gap-2 mb-2">
+              <button type="button" onclick="document.getElementById('c-image-gallery').click()"
+                class="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1">
+                🖼️ من المعرض
+              </button>
+              <button type="button" onclick="document.getElementById('c-image-camera').click()"
+                class="flex-1 border-2 rounded-2xl px-3 py-2.5 text-sm font-bold transition flex items-center justify-center gap-1"
+                style="border-color:#F5A623;color:#F47B20">
+                📷 تصوير
+              </button>
+            </div>
+            <input id="c-image-gallery" type="file" accept="image/*" class="hidden" onchange="handleCatImageSelect(this)" />
+            <input id="c-image-camera" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleCatImageSelect(this)" />
+            <input id="c-image" type="file" accept="image/*" class="hidden" />
+            <div id="c-image-preview" class="hidden mt-2 relative">
+              <img id="c-image-preview-img" src="" class="w-full h-28 object-cover rounded-2xl border-2" style="border-color:#F47B20" />
+              <button type="button" onclick="clearCatImagePreview()"
+                class="absolute top-2 left-2 bg-red-500 text-white rounded-full w-7 h-7 text-xs font-black flex items-center justify-center">✕</button>
+              <p id="c-image-size-info" class="text-xs text-gray-400 mt-1 text-center"></p>
+            </div>
+          </div>
+        </div>
+        <p id="cat-error" class="text-red-500 text-sm mb-3 hidden font-bold"></p>
+        <button onclick="saveCategory()"
+          class="gradient-bg text-white font-black py-3 px-8 rounded-2xl transition hover:opacity-90"
+          style="box-shadow:0 4px 15px rgba(244,123,32,0.3)">
+          💾 حفظ القسم
+        </button>
+      </div>
+
+      <!-- CATEGORIES LIST -->
+      <div class="bg-white rounded-3xl p-6 border border-gray-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+        <h2 class="text-xl font-black text-gray-800 mb-5">📂 جميع الأقسام</h2>
+        <div id="categories-table" class="space-y-3"></div>
+        <div id="cats-loading" class="text-center py-10 text-gray-400">
+          <div class="inline-block w-8 h-8 border-2 border-orange-200 border-t-orange-500 rounded-full spin mb-2"></div>
+          <p>جاري التحميل...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // =============================================
+  // إعدادات Supabase — لا تغير هذا القسم
+  // =============================================
+  const SUPABASE_URL = 'https://ydzphvflmnrqsiidhvmt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_NCUsnmCoNad3aao1NKelJA__gkGnvIf';
+  // =============================================
+
+  let authToken = null;
+  let allProducts = [];
+
+  // ====== AUTH ======
+  async function login() {
+    const email = document.getElementById('email-input').value.trim();
+    const password = document.getElementById('password-input').value;
+    const errEl = document.getElementById('login-error');
+    const loadEl = document.getElementById('login-loading');
+    if (!email || !password) {
+      errEl.textContent = '⚠️ أدخل الإيميل وكلمة المرور!';
+      errEl.classList.remove('hidden'); return;
+    }
+    errEl.classList.add('hidden');
+    loadEl.classList.remove('hidden');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.access_token) {
+        errEl.textContent = '⚠️ الإيميل أو كلمة المرور خاطئة!';
+        errEl.classList.remove('hidden');
+        loadEl.classList.add('hidden'); return;
+      }
+      authToken = data.access_token;
+      sessionStorage.setItem('sb_token', authToken);
+      showDashboard();
+    } catch(e) {
+      errEl.textContent = '⚠️ خطأ في الاتصال، حاول مجدداً';
+      errEl.classList.remove('hidden');
+      loadEl.classList.add('hidden');
+    }
+  }
+
+  document.getElementById('password-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  async function logout() {
+    try {
+      await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authToken}` }
+      });
+    } catch(e) {}
+    authToken = null;
+    sessionStorage.removeItem('sb_token');
+    location.reload();
+  }
+
+  function showDashboard() {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('admin-page').classList.remove('hidden');
+    loadProducts();
+    loadCategoriesSelect();
+    loadStats();
+  }
+
+  const savedToken = sessionStorage.getItem('sb_token');
+  if (savedToken) { authToken = savedToken; showDashboard(); }
+
+  // ====== SUPABASE HELPER ======
+  async function sbFetch(table, query = '', method = 'GET', body = null) {
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query}`, opts);
+    if (res.status === 401) { logout(); return null; }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  // ====== STATS ======
+  async function loadStats() {
+    const [products, cats] = await Promise.all([
+      sbFetch('products', '?select=id,available'),
+      sbFetch('categories', '?select=id')
+    ]);
+    if (products) {
+      const available = products.filter(p => p.available).length;
+      document.getElementById('stat-products').textContent = products.length;
+      document.getElementById('stat-available').textContent = available;
+      document.getElementById('stat-unavailable').textContent = products.length - available;
+    }
+    if (cats) document.getElementById('stat-cats').textContent = cats.length;
+  }
+
+  // ====== IMAGE ======
+  function compressImage(file, maxWidth=1000, maxHeight=1000, quality=0.82) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth/width, maxHeight/height);
+            width = Math.round(width*ratio); height = Math.round(height*ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+          }, 'image/jpeg', quality);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  let selectedProductFile = null;
+  let selectedCatFile = null;
+
+  async function handleImageSelect(input) {
+    const file = input.files[0]; if (!file) return;
+    const origKB = Math.round(file.size/1024);
+    const compressed = await compressImage(file);
+    const compKB = Math.round(compressed.size/1024);
+    selectedProductFile = compressed;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('p-image-preview-img').src = e.target.result;
+      document.getElementById('p-image-preview').classList.remove('hidden');
+      document.getElementById('p-image-size-info').textContent = `الحجم الأصلي: ${origKB} كيلوبايت ← بعد الضغط: ${compKB} كيلوبايت`;
+    };
+    reader.readAsDataURL(compressed);
+  }
+
+  async function handleCatImageSelect(input) {
+    const file = input.files[0]; if (!file) return;
+    const origKB = Math.round(file.size/1024);
+    const compressed = await compressImage(file, 800, 800);
+    const compKB = Math.round(compressed.size/1024);
+    selectedCatFile = compressed;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('c-image-preview-img').src = e.target.result;
+      document.getElementById('c-image-preview').classList.remove('hidden');
+      document.getElementById('c-image-size-info').textContent = `الحجم الأصلي: ${origKB} كيلوبايت ← بعد الضغط: ${compKB} كيلوبايت`;
+    };
+    reader.readAsDataURL(compressed);
+  }
+
+  function clearImagePreview() {
+    selectedProductFile = null;
+    document.getElementById('p-image-gallery').value = '';
+    document.getElementById('p-image-camera').value = '';
+    document.getElementById('p-image-preview').classList.add('hidden');
+    document.getElementById('p-image-preview-img').src = '';
+  }
+
+  function clearCatImagePreview() {
+    selectedCatFile = null;
+    document.getElementById('c-image-gallery').value = '';
+    document.getElementById('c-image-camera').value = '';
+    document.getElementById('c-image-preview').classList.add('hidden');
+    document.getElementById('c-image-preview-img').src = '';
+  }
+
+  async function uploadImage(file, bucket='product-images') {
+    const fileName = `${Date.now()}.jpg`;
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${fileName}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authToken}`, 'Content-Type': file.type },
+      body: file
+    });
+    if (!res.ok) throw new Error('فشل رفع الصورة');
+    return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+  }
+
+  // ====== TABS ======
+  function showTab(tab) {
+    ['products','categories'].forEach(t => {
+      document.getElementById(`tab-${t}-content`).classList.add('hidden');
+      document.getElementById(`tab-${t}`).className = 'tab-btn px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border-2 border-gray-200 transition';
+    });
+    document.getElementById(`tab-${tab}-content`).classList.remove('hidden');
+    document.getElementById(`tab-${tab}`).className = 'tab-btn tab-active px-6 py-2.5 rounded-xl font-bold text-sm transition';
+    if (tab === 'categories') loadCategoriesList();
+  }
+
+  // ====== PRODUCTS ======
+  async function loadProducts() {
+    document.getElementById('products-loading').classList.remove('hidden');
+    const products = await sbFetch('products', '?select=*,categories(name)&order=created_at.desc');
+    document.getElementById('products-loading').classList.add('hidden');
+    allProducts = products || [];
+    renderProductsTable(allProducts);
+  }
+
+  function renderProductsTable(products) {
+    const tbody = document.getElementById('products-table');
+    if (!products?.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-10">لا توجد منتجات</td></tr>';
+      return;
+    }
+    tbody.innerHTML = products.map(p => `
+      <tr class="border-b border-gray-50 transition">
+        <td class="py-3 pr-2">
+          <img src="${p.image_url || 'https://via.placeholder.com/50?text=📦'}"
+            class="w-12 h-12 rounded-xl object-cover border border-gray-100" />
+        </td>
+        <td class="py-3 font-bold text-gray-800 max-w-xs pr-2">
+          <div class="line-clamp-2">${p.name}</div>
+        </td>
+        <td class="py-3 font-black pr-2" style="color:#F47B20">${p.price} ₪</td>
+        <td class="py-3 text-gray-500 text-sm pr-2">${p.categories?.name || '—'}</td>
+        <td class="py-3 pr-2">
+          <span class="px-3 py-1 rounded-full text-xs font-bold ${p.available ? 'badge-available' : 'badge-unavailable'}">
+            ${p.available ? '✅ متوفر' : '❌ غير متوفر'}
+          </span>
+        </td>
+        <td class="py-3">
+          <div class="flex gap-2">
+            <button onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'
+              class="text-sm font-bold px-3 py-1.5 rounded-xl transition"
+              style="background:rgba(244,123,32,0.08);color:#F47B20">
+              ✏️ تعديل
+            </button>
+            <button onclick="deleteProduct(${p.id})"
+              class="text-sm font-bold px-3 py-1.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition">
+              🗑️ حذف
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function filterTable(val) {
+    const filtered = val
+      ? allProducts.filter(p => p.name.toLowerCase().includes(val.toLowerCase()))
+      : allProducts;
+    renderProductsTable(filtered);
+  }
+
+  async function loadCategoriesSelect() {
+    const cats = await sbFetch('categories', '?order=name');
+    const sel = document.getElementById('p-category');
+    sel.innerHTML = '<option value="">اختر القسم</option>';
+    cats?.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+  }
+
+  async function saveProduct() {
+    const name = document.getElementById('p-name').value.trim();
+    const price = document.getElementById('p-price').value;
+    const catId = document.getElementById('p-category').value;
+    const desc = document.getElementById('p-desc').value.trim();
+    const available = document.getElementById('p-available').checked;
+    const editId = document.getElementById('edit-product-id').value;
+    const errEl = document.getElementById('form-error');
+
+    if (!name || !price || !catId) {
+      errEl.textContent = '⚠️ الاسم والسعر والقسم مطلوبة!';
+      errEl.classList.remove('hidden'); return;
+    }
+    errEl.classList.add('hidden');
+
+    let imageUrl = document.getElementById('p-image-url').value;
+    if (selectedProductFile) {
+      document.getElementById('upload-progress').classList.remove('hidden');
+      document.getElementById('progress-bar').style.width = '50%';
+      try {
+        imageUrl = await uploadImage(selectedProductFile);
+        document.getElementById('progress-bar').style.width = '100%';
+      } catch(e) {
+        errEl.textContent = '⚠️ فشل رفع الصورة، حاول مجدداً';
+        errEl.classList.remove('hidden');
+        document.getElementById('upload-progress').classList.add('hidden'); return;
+      }
+    }
+
+    const data = { name, price: parseFloat(price), category_id: parseInt(catId), description: desc, available, image_url: imageUrl };
+    if (editId) {
+      await sbFetch('products', `?id=eq.${editId}`, 'PATCH', data);
+    } else {
+      await sbFetch('products', '', 'POST', data);
+    }
+
+    document.getElementById('upload-progress').classList.add('hidden');
+    resetProductForm();
+    loadProducts();
+    loadStats();
+  }
+
+  function editProduct(p) {
+    document.getElementById('form-title').textContent = '✏️ تعديل المنتج';
+    document.getElementById('edit-product-id').value = p.id;
+    document.getElementById('p-name').value = p.name;
+    document.getElementById('p-price').value = p.price;
+    document.getElementById('p-desc').value = p.description || '';
+    document.getElementById('p-category').value = p.category_id;
+    document.getElementById('p-available').checked = p.available;
+    document.getElementById('p-image-url').value = p.image_url || '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function deleteProduct(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    await sbFetch('products', `?id=eq.${id}`, 'DELETE');
+    loadProducts();
+    loadStats();
+  }
+
+  function resetProductForm() {
+    document.getElementById('form-title').textContent = '➕ إضافة منتج جديد';
+    document.getElementById('edit-product-id').value = '';
+    document.getElementById('p-name').value = '';
+    document.getElementById('p-price').value = '';
+    document.getElementById('p-desc').value = '';
+    document.getElementById('p-category').value = '';
+    document.getElementById('p-available').checked = true;
+    document.getElementById('p-image-url').value = '';
+    clearImagePreview();
+    document.getElementById('form-error').classList.add('hidden');
+  }
+
+  // ====== CATEGORIES ======
+  async function loadCategoriesList() {
+    document.getElementById('cats-loading').classList.remove('hidden');
+    const cats = await sbFetch('categories', '?order=name');
+    document.getElementById('cats-loading').classList.add('hidden');
+    const container = document.getElementById('categories-table');
+    if (!cats?.length) { container.innerHTML = '<p class="text-center text-gray-400 py-10">لا توجد أقسام</p>'; return; }
+    container.innerHTML = cats.map(c => `
+      <div class="flex items-center gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100 transition hover:border-orange-200">
+        <img src="${c.image_url || 'https://via.placeholder.com/50?text=📂'}"
+          class="w-14 h-14 rounded-xl object-cover border border-gray-200" />
+        <div class="flex-1">
+          <p class="font-black text-gray-800 text-lg">${c.name}</p>
+        </div>
+        <button onclick="deleteCategory(${c.id})"
+          class="text-sm font-bold px-4 py-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition">
+          🗑️ حذف
+        </button>
+      </div>`).join('');
+  }
+
+  async function saveCategory() {
+    const name = document.getElementById('c-name').value.trim();
+    const errEl = document.getElementById('cat-error');
+    if (!name) { errEl.textContent = '⚠️ اسم القسم مطلوب!'; errEl.classList.remove('hidden'); return; }
+    errEl.classList.add('hidden');
+    let imageUrl = '';
+    if (selectedCatFile) {
+      try { imageUrl = await uploadImage(selectedCatFile); }
+      catch(e) { errEl.textContent = '⚠️ فشل رفع الصورة'; errEl.classList.remove('hidden'); return; }
+    }
+    await sbFetch('categories', '', 'POST', { name, image_url: imageUrl });
+    document.getElementById('c-name').value = '';
+    clearCatImagePreview();
+    loadCategoriesList();
+    loadCategoriesSelect();
+    loadStats();
+  }
+
+  async function deleteCategory(id) {
+    if (!confirm('هل أنت متأكد؟ سيتم حذف القسم وكل منتجاته!')) return;
+    await sbFetch('products', `?category_id=eq.${id}`, 'DELETE');
+    await sbFetch('categories', `?id=eq.${id}`, 'DELETE');
+    loadCategoriesList();
+    loadProducts();
+    loadStats();
+  }
+</script>
+</body>
+</html>
