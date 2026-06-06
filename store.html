@@ -145,19 +145,27 @@
 
 @media (max-width: 768px) {
   #sidebar {
+    display: block !important;
     position: fixed;
-    top: 0; right: 0;
+    top: 0;
+    right: -300px;
+    left: auto;
     height: 100vh;
-    z-index: 50;
-    transform: translateX(100%);
+    z-index: 55;
     width: 280px !important;
-    box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+    border-radius: 0 !important;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.2);
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
   }
   #sidebar.open {
-    transform: translateX(0);
+    right: 0;
   }
   #main-content {
     width: 100% !important;
+  }
+  #sidebar-overlay {
+    z-index: 54;
   }
 }
 </style>
@@ -232,7 +240,7 @@
 
   <!-- ===== SIDEBAR ===== -->
   <aside id="sidebar"
-    class="w-64 flex-shrink-0 bg-white rounded-2xl border border-gray-100 self-start sticky top-24 overflow-hidden hidden md:block"
+    class="w-64 flex-shrink-0 bg-white rounded-2xl border border-gray-100 self-start sticky top-24 overflow-hidden md:block"
     style="box-shadow:0 4px 20px rgba(0,0,0,0.06)">
 
     <!-- Sidebar Header -->
@@ -423,7 +431,7 @@
   // =============================================
   const SUPABASE_URL = 'https://ydzphvflmnrqsiidhvmt.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_NCUsnmCoNad3aao1NKelJA__gkGnvIf';
-  const WHATSAPP_NUMBER = '972598018781';
+  const WHATSAPP_NUMBER = '972592085142';
   // =============================================
 
   let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -450,10 +458,12 @@
     if (sidebarOpen) {
       sidebar.classList.add('open');
       overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
       setTimeout(() => overlay.classList.remove('opacity-0'), 10);
     } else {
       sidebar.classList.remove('open');
       overlay.classList.add('opacity-0');
+      document.body.style.overflow = '';
       setTimeout(() => overlay.classList.add('hidden'), 350);
     }
   }
