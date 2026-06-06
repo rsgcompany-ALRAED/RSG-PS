@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>متجر الرائد RSG</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+<style>
+* { font-family: 'Cairo', sans-serif; }
+:root {
+  --orange: #F47B20;
+  --orange-light: #F5A623;
+  --dark: #1A1A1A;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #F47B20; border-radius: 3px; }
+
+/* SIDEBAR */
+#sidebar {
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
+#sidebar-overlay {
+  transition: opacity 0.35s ease;
+}
+
+/* CATEGORY ITEM */
+.cat-item {
+  transition: all 0.25s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+.cat-item:hover {
+  border-color: rgba(244,123,32,0.3);
+  background: rgba(244,123,32,0.04);
+}
+.cat-item.active {
+  border-color: #F47B20;
+  background: rgba(244,123,32,0.08);
+}
+.cat-item.active .cat-name {
+  color: #F47B20;
+}
+.cat-item .cat-img {
+  transition: transform 0.3s ease;
+}
+.cat-item:hover .cat-img {
+  transform: scale(1.05);
+}
+
+/* PRODUCT CARD */
+.product-card {
+  transition: all 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(244,123,32,0.12);
+}
+.product-card .prod-img img {
+  transition: transform 0.4s ease;
+}
+.product-card:hover .prod-img img {
+  transform: scale(1.06);
+}
+
+/* SKELETON */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* TOAST */
+#toast {
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  transform: translateY(80px);
+  opacity: 0;
+  pointer-events: none;
+}
+#toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* CART DRAWER */
+#cart-drawer {
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* SCROLL TOP */
+#scroll-top {
+  transition: all 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+#scroll-top.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* CART BADGE */
+.cart-badge { animation: pop 0.3s ease; }
+@keyframes pop {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+}
+
+/* MODAL */
+#product-modal { transition: opacity 0.3s ease; }
+
+/* SIDEBAR TOGGLE BTN */
+.sidebar-toggle-btn {
+  transition: all 0.3s ease;
+}
+
+/* GRADIENT */
+.grad { background: linear-gradient(135deg, #F47B20, #F5A623); }
+.grad-text {
+  background: linear-gradient(135deg, #F47B20, #F5A623);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Active indicator on sidebar */
+.cat-item.active::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #F47B20;
+  border-radius: 3px 0 0 3px;
+}
+.cat-item { position: relative; }
+
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(100%);
+    width: 280px !important;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+  }
+  #sidebar.open {
+    transform: translateX(0);
+  }
+  #main-content {
+    width: 100% !important;
+  }
+}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ===== HEADER ===== -->
+<header class="sticky top-0 z-40 bg-white border-b border-gray-100" style="box-shadow:0 2px 20px rgba(0,0,0,0.06)">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+
+    <!-- Logo -->
+    <a href="index.html" class="flex items-center gap-2 flex-shrink-0">
+      <div class="w-10 h-10 grad rounded-full flex items-center justify-center" style="box-shadow:0 4px 12px rgba(244,123,32,0.35)">
+        <span class="text-white font-black text-lg">ر</span>
+      </div>
+      <div class="hidden sm:block">
+        <div class="font-black text-gray-800 text-sm leading-tight">الرائد RSG</div>
+        <div class="text-xs font-bold" style="color:#F47B20">للإلكترونيات والتكنولوجيا</div>
+      </div>
+    </a>
+
+    <!-- Search -->
+    <div class="flex-1 max-w-md relative">
+      <input id="search-input" type="text" placeholder="🔍 ابحث عن منتج..."
+        oninput="searchProducts(this.value)"
+        class="w-full border-2 border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:outline-none focus:border-orange-400 transition bg-gray-50"
+        style="focus:border-color:#F47B20" />
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <!-- Sidebar toggle (mobile) -->
+      <button onclick="toggleSidebar()" id="sidebar-btn"
+        class="sidebar-toggle-btn flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 font-bold text-sm hover:border-orange-300 transition md:hidden">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+        </svg>
+        الأقسام
+      </button>
+
+      <!-- Cart -->
+      <button onclick="toggleCart()" class="relative p-2.5 rounded-xl border-2 border-gray-200 hover:border-orange-300 transition">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h13M7 13L5.4 5M10 21a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z"/>
+        </svg>
+        <span id="cart-count"
+          class="absolute -top-1 -left-1 text-white text-xs rounded-full w-5 h-5 items-center justify-center font-black hidden grad"
+          style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<div class="relative overflow-hidden" style="background:linear-gradient(135deg,#1A1A1A 0%,#2D2D2D 100%)">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(244,123,32,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(244,123,32,0.06) 1px,transparent 1px);background-size:50px 50px"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(244,123,32,0.12) 0%,transparent 60%)"></div>
+  <div class="relative max-w-7xl mx-auto px-4 py-10 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 text-sm font-bold" style="background:rgba(244,123,32,0.15);color:#F5A623;border:1px solid rgba(244,123,32,0.3)">
+      <span style="width:8px;height:8px;background:#F47B20;border-radius:50%;display:inline-block;animation:blink 1.5s ease-in-out infinite"></span>
+      اطلب بسهولة عبر واتساب
+    </div>
+    <h1 class="text-3xl md:text-4xl font-black text-white mb-2">متجر <span class="grad-text">الرائد RSG</span></h1>
+    <p class="text-gray-400 text-sm">أحدث كاميرات المراقبة وأجهزة الإنذار بأفضل الأسعار</p>
+  </div>
+  <style>@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}</style>
+</div>
+
+<!-- ===== LAYOUT ===== -->
+<div class="max-w-7xl mx-auto px-4 py-6 flex gap-6 relative">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar"
+    class="w-64 flex-shrink-0 bg-white rounded-2xl border border-gray-100 self-start sticky top-24 overflow-hidden hidden md:block"
+    style="box-shadow:0 4px 20px rgba(0,0,0,0.06)">
+
+    <!-- Sidebar Header -->
+    <div class="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 grad rounded-lg flex items-center justify-center">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+          </svg>
+        </div>
+        <span class="font-black text-gray-800 text-sm">الأقسام</span>
+      </div>
+      <!-- Close btn (mobile) -->
+      <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+    </div>
+
+    <!-- ALL category -->
+    <div class="p-3 border-b border-gray-50">
+      <div class="cat-item active rounded-xl p-3 flex items-center gap-3"
+        onclick="filterProducts('all', this)">
+        <div class="w-12 h-12 rounded-xl grad flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <span class="text-white text-xl">🛒</span>
+        </div>
+        <div>
+          <div class="cat-name font-black text-gray-800 text-sm">جميع المنتجات</div>
+          <div id="all-count" class="text-xs text-gray-400 font-bold"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories list -->
+    <div id="sidebar-cats" class="p-3 space-y-2 overflow-y-auto" style="max-height:60vh">
+      <!-- يتعبأ تلقائياً -->
+    </div>
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay"
+    class="fixed inset-0 bg-black/50 z-40 hidden opacity-0"
+    onclick="toggleSidebar()">
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div id="main-content" class="flex-1 min-w-0">
+
+    <!-- Results bar -->
+    <div class="flex items-center justify-between mb-4">
+      <div id="results-label" class="text-sm font-bold text-gray-500"></div>
+      <!-- Desktop sidebar toggle -->
+      <button onclick="toggleDesktopSidebar()" id="desktop-sidebar-btn"
+        class="hidden md:flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl border-2 border-gray-200 text-gray-600 hover:border-orange-300 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+        </svg>
+        <span id="desktop-toggle-label">إخفاء الأقسام</span>
+      </button>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+    <!-- Skeleton -->
+    <div id="loading" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+    <!-- Empty -->
+    <div id="empty" class="hidden text-center py-24">
+      <div class="text-6xl mb-4">📦</div>
+      <p class="text-gray-400 font-bold text-lg">لا توجد منتجات</p>
+      <p class="text-gray-300 text-sm mt-1">جرب تغيير القسم أو كلمة البحث</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"
+  class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] text-white font-black px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2 whitespace-nowrap grad"
+  style="box-shadow:0 8px 25px rgba(244,123,32,0.4)">
+  ✅ تمت الإضافة للسلة
+</div>
+
+<!-- ===== SCROLL TOP ===== -->
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+  class="fixed bottom-6 right-4 z-40 text-white w-11 h-11 rounded-full shadow-lg flex items-center justify-center text-xl grad"
+  style="box-shadow:0 4px 15px rgba(244,123,32,0.4)">
+  ↑
+</button>
+
+<!-- ===== WHATSAPP FLOAT ===== -->
+<a href="https://wa.me/972592085142" target="_blank"
+  class="fixed bottom-20 right-4 z-40 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg"
+  style="box-shadow:0 4px 15px rgba(37,211,102,0.4)" title="تواصل معنا">
+  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<!-- ===== CART OVERLAY ===== -->
+<div id="overlay" class="fixed inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity" onclick="toggleCart()"></div>
+
+<!-- ===== CART DRAWER ===== -->
+<div id="cart-drawer"
+  class="fixed top-0 left-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col transform -translate-x-full">
+
+  <div class="flex items-center justify-between p-4 border-b" style="background:linear-gradient(135deg,#F47B20,#F5A623)">
+    <div class="flex items-center gap-2">
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h13M7 13L5.4 5M10 21a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z"/>
+      </svg>
+      <h2 class="text-lg font-black text-white">سلة الطلبات</h2>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="clear-cart-btn" onclick="clearCart()"
+        class="hidden text-sm text-white/80 hover:text-white font-bold transition">🗑️ إفراغ</button>
+      <button onclick="toggleCart()" class="text-white/80 hover:text-white text-2xl font-bold">&times;</button>
+    </div>
+  </div>
+
+  <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3">
+    <p id="cart-empty" class="text-center text-gray-400 mt-20 font-bold">السلة فارغة 🛒</p>
+  </div>
+
+  <div class="p-4 border-t bg-gray-50">
+    <div class="flex justify-between items-center mb-4">
+      <span class="font-bold text-gray-600">المجموع الكلي:</span>
+      <span id="cart-total" class="text-2xl font-black grad-text">0 ₪</span>
+    </div>
+    <button onclick="sendWhatsApp()"
+      class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-2xl text-base flex items-center justify-center gap-2 transition"
+      style="box-shadow:0 4px 15px rgba(37,211,102,0.35)">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      اطلب عبر واتساب
+    </button>
+  </div>
+</div>
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div id="product-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60">
+  <div class="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl" style="animation:modalIn 0.3s ease">
+    <div class="relative">
+      <img id="modal-img" src="" alt="" class="w-full h-56 object-cover" />
+      <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 50%)"></div>
+      <button onclick="closeModal()"
+        class="absolute top-3 left-3 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-gray-600 font-black text-lg hover:bg-white transition">
+        ×
+      </button>
+    </div>
+    <div class="p-6">
+      <h3 id="modal-name" class="text-xl font-black text-gray-800 mb-2"></h3>
+      <p id="modal-desc" class="text-gray-500 text-sm mb-4 leading-relaxed"></p>
+      <div class="flex items-center justify-between mb-6">
+        <span id="modal-price" class="text-3xl font-black grad-text"></span>
+        <div class="flex items-center gap-2 bg-gray-100 rounded-2xl p-1">
+          <button onclick="changeQty(-1)"
+            class="w-9 h-9 bg-white rounded-xl font-black text-gray-700 shadow text-lg hover:bg-gray-50 transition">−</button>
+          <span id="modal-qty" class="font-black text-gray-800 w-8 text-center text-lg">1</span>
+          <button onclick="changeQty(1)"
+            class="w-9 h-9 bg-white rounded-xl font-black text-gray-700 shadow text-lg hover:bg-gray-50 transition">+</button>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="closeModal()"
+          class="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition">
+          إلغاء
+        </button>
+        <button onclick="addToCartFromModal()"
+          class="flex-1 py-3 rounded-2xl text-white font-black grad transition hover:opacity-90"
+          style="box-shadow:0 4px 15px rgba(244,123,32,0.35)">
+          أضف للسلة
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes modalIn {
+  from { opacity:0; transform:scale(0.95) translateY(10px); }
+  to { opacity:1; transform:scale(1) translateY(0); }
+}
+</style>
+
+<script>
+  // =============================================
+  // الإعدادات — لا تغير هذا القسم
+  // =============================================
+  const SUPABASE_URL = 'https://ydzphvflmnrqsiidhvmt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_NCUsnmCoNad3aao1NKelJA__gkGnvIf';
+  const WHATSAPP_NUMBER = '972592085142';
+  // =============================================
+
+  let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  let currentProduct = null;
+  let currentQty = 1;
+  let currentCat = 'all';
+  let allProducts = [];
+  let sidebarOpen = false;
+  let desktopSidebarVisible = true;
+
+  // ====== SUPABASE ======
+  async function supabase(table, query = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.json();
+  }
+
+  // ====== SIDEBAR TOGGLE (mobile) ======
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebarOpen = !sidebarOpen;
+    if (sidebarOpen) {
+      sidebar.classList.add('open');
+      overlay.classList.remove('hidden');
+      setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    } else {
+      sidebar.classList.remove('open');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => overlay.classList.add('hidden'), 350);
+    }
+  }
+
+  // ====== SIDEBAR TOGGLE (desktop) ======
+  function toggleDesktopSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const label = document.getElementById('desktop-toggle-label');
+    desktopSidebarVisible = !desktopSidebarVisible;
+    if (desktopSidebarVisible) {
+      sidebar.classList.remove('hidden');
+      sidebar.classList.add('block');
+      label.textContent = 'إخفاء الأقسام';
+    } else {
+      sidebar.classList.add('hidden');
+      label.textContent = 'إظهار الأقسام';
+    }
+  }
+
+  // ====== LOAD CATEGORIES ======
+  async function loadCategories() {
+    const cats = await supabase('categories', '?order=name');
+    const container = document.getElementById('sidebar-cats');
+    container.innerHTML = '';
+    cats?.forEach(cat => {
+      const item = document.createElement('div');
+      item.className = 'cat-item rounded-xl p-3 flex items-center gap-3';
+      item.innerHTML = `
+        <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+          ${cat.image_url
+            ? `<img src="${cat.image_url}" alt="${cat.name}" class="cat-img w-full h-full object-cover" />`
+            : `<div class="w-full h-full grad flex items-center justify-center text-white text-xl">📂</div>`
+          }
+        </div>
+        <div class="min-w-0">
+          <div class="cat-name font-black text-gray-800 text-sm truncate">${cat.name}</div>
+        </div>`;
+      item.onclick = () => filterProducts(cat.id, item);
+      container.appendChild(item);
+    });
+  }
+
+  // ====== SKELETON ======
+  function showSkeleton() {
+    const loading = document.getElementById('loading');
+    loading.classList.remove('hidden');
+    loading.innerHTML = Array(8).fill(`
+      <div class="bg-white rounded-2xl overflow-hidden border border-gray-100">
+        <div class="skeleton w-full h-44"></div>
+        <div class="p-3 space-y-2">
+          <div class="skeleton h-4 w-3/4 rounded-lg"></div>
+          <div class="skeleton h-5 w-1/3 rounded-lg"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ====== LOAD PRODUCTS ======
+  async function loadProductsWithSearch(catId = 'all') {
+    showSkeleton();
+    document.getElementById('products-grid').innerHTML = '';
+    document.getElementById('empty').classList.add('hidden');
+
+    let query = '?select=*,categories(name)&available=eq.true&order=name';
+    if (catId !== 'all') query += `&category_id=eq.${catId}`;
+
+    allProducts = await supabase('products', query) || [];
+    document.getElementById('loading').classList.add('hidden');
+
+    // Update "all" count
+    if (catId === 'all') {
+      document.getElementById('all-count').textContent = `${allProducts.length} منتج`;
+    }
+
+    const searchVal = document.getElementById('search-input').value.trim();
+    applySearch(searchVal);
+  }
+
+  function applySearch(val) {
+    const filtered = val
+      ? allProducts.filter(p =>
+          p.name.toLowerCase().includes(val.toLowerCase()) ||
+          (p.description || '').toLowerCase().includes(val.toLowerCase()))
+      : allProducts;
+
+    document.getElementById('results-label').textContent =
+      `${filtered.length} منتج${currentCat !== 'all' ? ' في هذا القسم' : ''}`;
+
+    if (!filtered.length) {
+      document.getElementById('products-grid').innerHTML = '';
+      document.getElementById('empty').classList.remove('hidden');
+    } else {
+      document.getElementById('empty').classList.add('hidden');
+      renderProducts(filtered);
+    }
+  }
+
+  function searchProducts(val) { applySearch(val); }
+
+  function filterProducts(catId, btnEl) {
+    currentCat = catId;
+    document.getElementById('search-input').value = '';
+    // Update active state
+    document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+    loadProductsWithSearch(catId);
+    // Close sidebar on mobile
+    if (sidebarOpen) toggleSidebar();
+  }
+
+  // ====== RENDER PRODUCTS ======
+  function renderProducts(products) {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = '';
+    products.forEach(p => {
+      const inCart = cart.some(i => i.id === p.id);
+      const card = document.createElement('div');
+      card.className = 'product-card bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer';
+      card.style.boxShadow = '0 2px 10px rgba(0,0,0,0.04)';
+      card.innerHTML = `
+        <div class="prod-img relative overflow-hidden" style="height:180px;background:#f8fafc">
+          <img src="${p.image_url || 'https://via.placeholder.com/300x200?text=📦'}"
+            alt="${p.name}" class="w-full h-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.15) 0%,transparent 50%)"></div>
+          <span class="absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full"
+            style="background:rgba(255,255,255,0.92);color:#666">${p.categories?.name || ''}</span>
+          ${inCart ? `<span class="absolute bottom-2 left-2 text-white text-xs font-black px-2.5 py-1 rounded-full grad">✓ في السلة</span>` : ''}
+        </div>
+        <div class="p-3">
+          <h4 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2 leading-snug">${p.name}</h4>
+          <div class="flex items-center justify-between mt-2">
+            <span class="font-black text-lg grad-text">${p.price} ₪</span>
+            <button class="w-8 h-8 rounded-xl grad flex items-center justify-center text-white font-black text-lg shadow-sm hover:opacity-90 transition"
+              style="box-shadow:0 2px 8px rgba(244,123,32,0.3)"
+              onclick="event.stopPropagation();quickAdd(${JSON.stringify(p).replace(/"/g,'&quot;')})">+</button>
+          </div>
+        </div>`;
+      card.onclick = () => openModal(p);
+      grid.appendChild(card);
+    });
+  }
+
+  // ====== QUICK ADD ======
+  function quickAdd(p) {
+    const existing = cart.find(i => i.id === p.id);
+    if (existing) existing.qty += 1;
+    else cart.push({ ...p, qty: 1 });
+    saveCart();
+    updateCartUI();
+    showToast();
+    applySearch(document.getElementById('search-input').value.trim());
+  }
+
+  // ====== MODAL ======
+  function openModal(product) {
+    currentProduct = product;
+    currentQty = 1;
+    document.getElementById('modal-img').src = product.image_url || 'https://via.placeholder.com/400x250?text=📦';
+    document.getElementById('modal-name').textContent = product.name;
+    document.getElementById('modal-desc').textContent = product.description || 'لا يوجد وصف';
+    document.getElementById('modal-price').textContent = `${product.price} ₪`;
+    document.getElementById('modal-qty').textContent = 1;
+    const modal = document.getElementById('product-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('product-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function changeQty(delta) {
+    currentQty = Math.max(1, currentQty + delta);
+    document.getElementById('modal-qty').textContent = currentQty;
+  }
+
+  function addToCartFromModal() {
+    const existing = cart.find(i => i.id === currentProduct.id);
+    if (existing) existing.qty += currentQty;
+    else cart.push({ ...currentProduct, qty: currentQty });
+    saveCart();
+    closeModal();
+    updateCartUI();
+    showToast();
+    applySearch(document.getElementById('search-input').value.trim());
+  }
+
+  // ====== TOAST ======
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // ====== CART ======
+  function toggleCart() {
+    const drawer = document.getElementById('cart-drawer');
+    const overlay = document.getElementById('overlay');
+    const isOpen = !drawer.classList.contains('-translate-x-full');
+    if (isOpen) {
+      drawer.classList.add('-translate-x-full');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => overlay.classList.add('hidden'), 300);
+    } else {
+      drawer.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+      setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+      renderCart();
+    }
+  }
+
+  function clearCart() {
+    if (!cart.length) return;
+    cart = []; saveCart(); renderCart();
+  }
+
+  function renderCart() {
+    const container = document.getElementById('cart-items');
+    const clearBtn = document.getElementById('clear-cart-btn');
+    if (!cart.length) {
+      clearBtn.classList.add('hidden');
+      container.innerHTML = '<p id="cart-empty" class="text-center text-gray-400 mt-20 font-bold">السلة فارغة 🛒</p>';
+      return;
+    }
+    clearBtn.classList.remove('hidden');
+    container.innerHTML = cart.map((item, i) => `
+      <div class="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 border border-gray-100">
+        <img src="${item.image_url || 'https://via.placeholder.com/60?text=📦'}"
+          class="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-gray-800 text-sm line-clamp-1">${item.name}</p>
+          <p class="font-black text-sm grad-text">${item.price} ₪</p>
+          <div class="flex items-center gap-2 mt-1">
+            <button onclick="updateQty(${i},-1)"
+              class="w-7 h-7 bg-white rounded-lg shadow text-gray-600 font-black text-sm border border-gray-200">−</button>
+            <span class="font-black text-sm w-6 text-center">${item.qty}</span>
+            <button onclick="updateQty(${i},1)"
+              class="w-7 h-7 bg-white rounded-lg shadow text-gray-600 font-black text-sm border border-gray-200">+</button>
+          </div>
+        </div>
+        <button onclick="removeItem(${i})" class="text-red-400 hover:text-red-600 text-2xl font-black flex-shrink-0">×</button>
+      </div>`).join('');
+    updateCartUI();
+  }
+
+  function updateQty(i, delta) {
+    cart[i].qty = Math.max(1, cart[i].qty + delta);
+    saveCart(); renderCart();
+  }
+
+  function removeItem(i) {
+    cart.splice(i, 1); saveCart(); renderCart();
+  }
+
+  function updateCartUI() {
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cart-total').textContent = `${total} ₪`;
+    const badge = document.getElementById('cart-count');
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'flex';
+      badge.classList.add('cart-badge');
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartUI();
+  }
+
+  // ====== WHATSAPP ======
+  function sendWhatsApp() {
+    if (!cart.length) return alert('السلة فارغة!');
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    let msg = '🛒 *طلب جديد - الرائد RSG*\n\n';
+    cart.forEach(i => { msg += `• ${i.name} × ${i.qty} = ${i.price * i.qty} ₪\n`; });
+    msg += `\n💰 *المجموع: ${total} ₪*\n\nأرجو التواصل لتأكيد الطلب 🙏`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+    cart = []; saveCart(); renderCart();
+  }
+
+  // ====== SCROLL TOP ======
+  window.addEventListener('scroll', () => {
+    document.getElementById('scroll-top').classList.toggle('visible', window.scrollY > 300);
+  });
+
+  // ====== INIT ======
+  loadCategories();
+  loadProductsWithSearch();
+  updateCartUI();
+</script>
+</body>
+</html>
