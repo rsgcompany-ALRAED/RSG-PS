@@ -673,6 +673,27 @@
 
   async function deleteProduct(id) {
     if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+
+    // 1. جيب رابط الصورة أولاً
+    const product = await sbFetch('products', `?id=eq.${id}&select=image_url`);
+
+    // 2. احذف الصورة من Storage إذا كانت موجودة
+    if (product?.[0]?.image_url) {
+      try {
+        const fileName = product[0].image_url.split('/').pop();
+        await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${fileName}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+      } catch(e) {
+        console.warn('تعذّر حذف الصورة من Storage:', e);
+      }
+    }
+
+    // 3. احذف السجل من قاعدة البيانات
     await sbFetch('products', `?id=eq.${id}`, 'DELETE');
     loadProducts();
     loadStats();
@@ -732,6 +753,42 @@
 
   async function deleteCategory(id) {
     if (!confirm('هل أنت متأكد؟ سيتم حذف القسم وكل منتجاته!')) return;
+
+    // 1. جيب صور المنتجات التابعة للقسم
+    const products = await sbFetch('products', `?category_id=eq.${id}&select=image_url`);
+
+    // 2. احذف صور المنتجات من Storage
+    if (products?.length) {
+      for (const p of products) {
+        if (p.image_url) {
+          try {
+            const fileName = p.image_url.split('/').pop();
+            await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${fileName}`, {
+              method: 'DELETE',
+              headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authToken}` }
+            });
+          } catch(e) {
+            console.warn('تعذّر حذف صورة منتج:', e);
+          }
+        }
+      }
+    }
+
+    // 3. احذف صورة القسم نفسه من Storage
+    const cats = await sbFetch('categories', `?id=eq.${id}&select=image_url`);
+    if (cats?.[0]?.image_url) {
+      try {
+        const fileName = cats[0].image_url.split('/').pop();
+        await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${fileName}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authToken}` }
+        });
+      } catch(e) {
+        console.warn('تعذّر حذف صورة القسم:', e);
+      }
+    }
+
+    // 4. احذف المنتجات والقسم من قاعدة البيانات
     await sbFetch('products', `?category_id=eq.${id}`, 'DELETE');
     await sbFetch('categories', `?id=eq.${id}`, 'DELETE');
     loadCategoriesList();
