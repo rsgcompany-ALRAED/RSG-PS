@@ -186,6 +186,26 @@ footer{background:#0D0D0D;padding:70px 5% 30px;border-top:1px solid rgba(244,123
 .footer-bottom p{font-size:13px;color:rgba(255,255,255,.3)}
 .footer-bottom span{color:var(--orange)}
 
+/* CATEGORIES GRID */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:50px}
+.cat-card{background:var(--dark-3);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:32px 24px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:12px;transition:all .4s ease;position:relative;overflow:hidden}
+.cat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gradient);transform:scaleX(0);transition:transform .4s ease}
+.cat-card:hover{transform:translateY(-6px);border-color:rgba(244,123,32,.3);box-shadow:0 15px 40px rgba(244,123,32,.1)}
+.cat-card:hover::after{transform:scaleX(1)}
+.cat-icon{font-size:36px;width:64px;height:64px;background:rgba(244,123,32,.1);border:1px solid rgba(244,123,32,.2);border-radius:18px;display:flex;align-items:center;justify-content:center;transition:all .3s ease}
+.cat-card:hover .cat-icon{background:var(--gradient);border-color:transparent;box-shadow:0 8px 25px rgba(244,123,32,.4)}
+.cat-title{font-family:'Cairo',sans-serif;font-size:18px;font-weight:700;color:var(--white)}
+.cat-sub{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6}
+
+/* SECTORS GRID */
+.sectors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:50px}
+.sector-card{background:var(--dark-3);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:36px 28px;transition:all .4s ease;display:flex;flex-direction:column;gap:14px}
+.sector-card:hover{transform:translateY(-6px);border-color:rgba(244,123,32,.3);box-shadow:0 20px 50px rgba(244,123,32,.12)}
+.sector-icon{font-size:36px;width:64px;height:64px;background:rgba(244,123,32,.1);border:1px solid rgba(244,123,32,.2);border-radius:18px;display:flex;align-items:center;justify-content:center;transition:all .3s ease}
+.sector-card:hover .sector-icon{background:var(--gradient);border-color:transparent;box-shadow:0 8px 25px rgba(244,123,32,.4)}
+.sector-title{font-family:'Cairo',sans-serif;font-size:18px;font-weight:700;color:var(--white)}
+.sector-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.75}
+
 /* WHATSAPP */
 .whatsapp-float{position:fixed;bottom:30px;left:30px;z-index:999;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(37,211,102,.4);text-decoration:none;animation:waPulse 2s ease-in-out infinite;font-size:26px}
 @keyframes waPulse{0%,100%{box-shadow:0 8px 25px rgba(37,211,102,.4)}50%{box-shadow:0 8px 40px rgba(37,211,102,.7)}}
@@ -207,6 +227,8 @@ footer{background:#0D0D0D;padding:70px 5% 30px;border-top:1px solid rgba(244,123
 .why-grid{grid-template-columns:1fr}
 .products-grid{grid-template-columns:repeat(2,1fr)}
 .projects-grid{grid-template-columns:repeat(2,1fr)}
+.cat-grid{grid-template-columns:repeat(2,1fr)}
+.sectors-grid{grid-template-columns:repeat(2,1fr)}
 .footer-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:768px){
@@ -217,6 +239,8 @@ nav{padding:0 4%}
 .hero-container{padding:40px 4%}
 .services-grid{grid-template-columns:1fr}
 .projects-grid{grid-template-columns:1fr}
+.cat-grid{grid-template-columns:1fr}
+.sectors-grid{grid-template-columns:1fr}
 .footer-grid{grid-template-columns:1fr}
 .float-card{display:none}
 .hero-stats{gap:20px;flex-wrap:wrap;justify-content:center}
@@ -380,7 +404,7 @@ nav{padding:0 4%}
       <div>
         <div class="section-tag">لماذا نحن</div>
         <h2 class="section-title">الخبرة والجودة <span>في خدمتك</span></h2>
-        <p class="section-desc">أكثر من عشر سنوات من الخبرة في مجال الأمن والمراقبة تجعلنا الخيار الأول لعملائنا.</p>
+        <p class="section-desc">أكثر من ثماني سنوات من الخبرة في مجال الأمن والمراقبة تجعلنا الخيار الأول لعملائنا.</p>
         <div class="why-features">
           <div class="why-feature reveal">
             <div class="why-feature-icon">🏆</div>
@@ -398,8 +422,8 @@ nav{padding:0 4%}
       </div>
       <div>
         <div class="stats-grid">
-          <div class="stat-card reveal"><div class="num">+500</div><div class="lbl">مشروع منجز</div></div>
-          <div class="stat-card reveal"><div class="num">+10</div><div class="lbl">سنوات خبرة</div></div>
+          <div class="stat-card reveal"><div class="num">+400</div><div class="lbl">مشروع منجز</div></div>
+          <div class="stat-card reveal"><div class="num">+8</div><div class="lbl">سنوات خبرة</div></div>
           <div class="stat-card reveal"><div class="num">+200</div><div class="lbl">عميل راضٍ</div></div>
           <div class="stat-card reveal"><div class="num">24/7</div><div class="lbl">دعم فني</div></div>
           <div class="stat-card big reveal"><div class="num">100%</div><div class="lbl">ضمان رضا العملاء</div></div>
@@ -415,27 +439,41 @@ nav{padding:0 4%}
     <div class="services-header">
       <div>
         <div class="section-tag">منتجاتنا</div>
-        <h2 class="section-title">أحدث <span>المنتجات</span></h2>
-        <p class="section-desc">تشكيلة واسعة من أجود الكاميرات وأجهزة الإنذار لتلبية جميع احتياجاتك.</p>
+        <h2 class="section-title">فئات <span>المنتجات</span></h2>
+        <p class="section-desc">نوفّر تشكيلة متكاملة من أجهزة الأمن والمراقبة لتلبية جميع احتياجاتك.</p>
       </div>
       <a href="store.html" class="btn-secondary" style="white-space:nowrap">زيارة المتجر</a>
     </div>
-    <div class="products-grid">
-      <a href="store.html" class="product-card reveal">
-        <div class="product-img">📷<div class="product-badge">جديد</div></div>
-        <div class="product-info"><div class="product-cat">كاميرات داخلية</div><div class="product-name">كاميرا IP مخفية 4K</div></div>
+    <div class="cat-grid">
+      <a href="store.html" class="cat-card reveal">
+        <div class="cat-icon">📷</div>
+        <div class="cat-title">كاميرات المراقبة</div>
+        <div class="cat-sub">داخلية وخارجية بأحدث التقنيات</div>
       </a>
-      <a href="store.html" class="product-card reveal">
-        <div class="product-img">🎥<div class="product-badge">الأكثر مبيعاً</div></div>
-        <div class="product-info"><div class="product-cat">كاميرات خارجية</div><div class="product-name">كاميرا Dome مقاومة للماء</div></div>
+      <a href="store.html" class="cat-card reveal">
+        <div class="cat-icon">🚨</div>
+        <div class="cat-title">أجهزة الإنذار</div>
+        <div class="cat-sub">إنذار حريق وسرقة بتنبيه فوري</div>
       </a>
-      <a href="store.html" class="product-card reveal">
-        <div class="product-img">🚨</div>
-        <div class="product-info"><div class="product-cat">أجهزة إنذار</div><div class="product-name">جهاز إنذار ذكي لاسلكي</div></div>
+      <a href="store.html" class="cat-card reveal">
+        <div class="cat-icon">🖥️</div>
+        <div class="cat-title">أجهزة التسجيل</div>
+        <div class="cat-sub">DVR وNVR لحفظ التسجيلات</div>
       </a>
-      <a href="store.html" class="product-card reveal">
-        <div class="product-img">🖥️</div>
-        <div class="product-info"><div class="product-cat">DVR/NVR</div><div class="product-name">مسجل DVR 16 قناة</div></div>
+      <a href="store.html" class="cat-card reveal">
+        <div class="cat-icon">🚪</div>
+        <div class="cat-title">التحكم بالدخول</div>
+        <div class="cat-sub">بصمة وبطاقة وأقفال ذكية</div>
+      </a>
+      <a href="store.html" class="cat-card reveal">
+        <div class="cat-icon">📡</div>
+        <div class="cat-title">الشبكات والاتصالات</div>
+        <div class="cat-sub">راوترات وكابلات وتمديدات</div>
+      </a>
+      <a href="store.html" class="cat-card reveal">
+        <div class="cat-icon">🔋</div>
+        <div class="cat-title">أنظمة الطاقة</div>
+        <div class="cat-sub">بطاريات احتياطية ووحدات UPS</div>
       </a>
     </div>
   </div>
@@ -446,21 +484,39 @@ nav{padding:0 4%}
   <div class="container">
     <div style="text-align:center;margin-bottom:50px">
       <div class="section-tag" style="justify-content:center">أعمالنا</div>
-      <h2 class="section-title">مشاريع <span>نفخر بها</span></h2>
-      <p class="section-desc" style="margin:0 auto">نماذج من مشاريعنا المنجزة في مختلف القطاعات التجارية والسكنية.</p>
+      <h2 class="section-title">قطاعات <span>نخدمها</span></h2>
+      <p class="section-desc" style="margin:0 auto">خبرة واسعة في تنفيذ مشاريع الأمن والمراقبة عبر مختلف القطاعات.</p>
     </div>
-    <div class="projects-grid">
-      <div class="project-card reveal">
-        <div class="project-img">🏢<div class="project-overlay"><span class="project-type">تجاري</span></div></div>
-        <div class="project-info"><div class="project-name">منظومة مراقبة مجمع تجاري</div><p class="project-desc">تركيب 48 كاميرا مراقبة وأجهزة إنذار متكاملة مع نظام تحكم مركزي.</p></div>
+    <div class="sectors-grid">
+      <div class="sector-card reveal">
+        <div class="sector-icon">🏢</div>
+        <div class="sector-title">المجمعات التجارية</div>
+        <p class="sector-desc">تأمين المراكز التجارية والمحلات والشركات بأنظمة مراقبة متكاملة.</p>
       </div>
-      <div class="project-card reveal">
-        <div class="project-img">🏠<div class="project-overlay"><span class="project-type">سكني</span></div></div>
-        <div class="project-info"><div class="project-name">نظام أمن فيلا سكنية</div><p class="project-desc">حلول أمنية متكاملة تشمل الكاميرات وأجهزة الإنذار والتحكم بالدخول.</p></div>
+      <div class="sector-card reveal">
+        <div class="sector-icon">🏠</div>
+        <div class="sector-title">القطاع السكني</div>
+        <p class="sector-desc">حلول أمنية للمنازل والفلل والمجمعات السكنية بأعلى مستوى من الحماية.</p>
       </div>
-      <div class="project-card reveal">
-        <div class="project-img">🏭<div class="project-overlay"><span class="project-type">صناعي</span></div></div>
-        <div class="project-info"><div class="project-name">تأمين مستودع صناعي</div><p class="project-desc">منظومة مراقبة شاملة لمستودع بمساحة 5000 متر مع إنذار حريق متقدم.</p></div>
+      <div class="sector-card reveal">
+        <div class="sector-icon">🏭</div>
+        <div class="sector-title">القطاع الصناعي</div>
+        <p class="sector-desc">منظومات مراقبة شاملة للمستودعات والمصانع والمنشآت الصناعية.</p>
+      </div>
+      <div class="sector-card reveal">
+        <div class="sector-icon">🏫</div>
+        <div class="sector-title">المؤسسات التعليمية</div>
+        <p class="sector-desc">بيئات آمنة للمدارس والجامعات بأنظمة مراقبة ذكية وتحكم بالدخول.</p>
+      </div>
+      <div class="sector-card reveal">
+        <div class="sector-icon">🏥</div>
+        <div class="sector-title">القطاع الصحي</div>
+        <p class="sector-desc">حلول أمنية متخصصة للمستشفيات والعيادات والمراكز الطبية.</p>
+      </div>
+      <div class="sector-card reveal">
+        <div class="sector-icon">🏛️</div>
+        <div class="sector-title">المباني الحكومية</div>
+        <p class="sector-desc">أنظمة أمن متكاملة للدوائر الحكومية والمؤسسات الرسمية.</p>
       </div>
     </div>
     <div style="text-align:center;margin-top:40px">
@@ -477,7 +533,7 @@ nav{padding:0 4%}
     <p>تواصل معنا اليوم للحصول على استشارة مجانية وعرض سعر مخصص يناسب احتياجاتك وميزانيتك.</p>
     <div class="cta-btns">
       <a href="contact.html" class="btn-primary">احصل على عرض مجاني</a>
-      <a href="tel:+966XXXXXXXXX" class="btn-secondary">📞 اتصل بنا الآن</a>
+      <a href="tel:+972598018781" class="btn-secondary">📞 اتصل بنا الآن</a>
     </div>
   </div>
 </section>
@@ -492,10 +548,12 @@ nav{padding:0 4%}
       </a>
       <p>شركة متخصصة في تقديم أحدث حلول الأمن والمراقبة بأعلى معايير الجودة والاحترافية.</p>
       <div class="social-links">
+        <!-- فيسبوك: ضع رابط الصفحة هنا بدلاً من # -->
         <a href="#" class="social-link">📘</a>
+        <!-- انستغرام: ضع رابط الصفحة هنا بدلاً من # -->
         <a href="#" class="social-link">📸</a>
-        <a href="#" class="social-link">🐦</a>
-        <a href="#" class="social-link">💼</a>
+        <!-- تيكتوك: ضع رابط الصفحة هنا بدلاً من # -->
+        <a href="#" class="social-link">🎵</a>
       </div>
     </div>
     <div class="footer-col">
@@ -521,19 +579,19 @@ nav{padding:0 4%}
     </div>
     <div class="footer-col">
       <h4>تواصل معنا</h4>
-      <div class="contact-item"><div class="icon">📍</div><div class="info">المملكة العربية السعودية</div></div>
-      <div class="contact-item"><div class="icon">📞</div><div class="info">+966 XXX XXX XXXX</div></div>
-      <div class="contact-item"><div class="icon">✉️</div><div class="info">info@raed-rsg.com</div></div>
+      <div class="contact-item"><div class="icon">📍</div><div class="info">فلسطين</div></div>
+      <div class="contact-item"><div class="icon">📞</div><div class="info">+972 598 018 781</div></div>
+      <div class="contact-item"><div class="icon">✉️</div><div class="info">rsg.company92@gmail.com</div></div>
       <div class="contact-item"><div class="icon">⏰</div><div class="info">السبت - الخميس<br>8 صباحاً - 8 مساءً</div></div>
     </div>
   </div>
   <div class="footer-bottom">
     <p>© 2025 <span>شركة الرائد RSG</span> — جميع الحقوق محفوظة</p>
-    <p>تصميم وتطوير بـ ❤️</p>
+    <p>تصميم وتطوير بـ ❤️ <span>ZK</span></p>
   </div>
 </footer>
 
-<a href="https://wa.me/966XXXXXXXXX" class="whatsapp-float" target="_blank" title="تواصل عبر واتساب">💬</a>
+<a href="https://wa.me/972598018781" class="whatsapp-float" target="_blank" title="تواصل عبر واتساب">💬</a>
 
 <script>
 const navbar=document.getElementById('navbar');
