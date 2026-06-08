@@ -173,6 +173,10 @@
         class="tab-btn px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border-2 border-gray-200 transition">
         📂 الأقسام
       </button>
+      <button onclick="showTab('projects')" id="tab-projects"
+        class="tab-btn px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border-2 border-gray-200 transition">
+        🏗️ المشاريع
+      </button>
     </div>
 
     <!-- ===== PRODUCTS TAB ===== -->
@@ -346,6 +350,100 @@
         <h2 class="text-xl font-black text-gray-800 mb-5">📂 جميع الأقسام</h2>
         <div id="categories-table" class="space-y-3"></div>
         <div id="cats-loading" class="text-center py-10 text-gray-400">
+          <div class="inline-block w-8 h-8 border-2 border-orange-200 border-t-orange-500 rounded-full spin mb-2"></div>
+          <p>جاري التحميل...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PROJECTS TAB ===== -->
+    <div id="tab-projects-content" class="hidden">
+
+      <!-- FORM -->
+      <div class="bg-white rounded-3xl p-6 mb-6 border border-gray-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 id="proj-form-title" class="text-xl font-black text-gray-800">➕ إضافة مشروع جديد</h2>
+          <div class="w-8 h-1 rounded-full gradient-bg"></div>
+        </div>
+        <input type="hidden" id="edit-project-id" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">عنوان المشروع *</label>
+            <input id="proj-title" type="text" placeholder="مثال: تأمين مجمع تجاري في رام الله"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">نوع المشروع *</label>
+            <select id="proj-type" class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition bg-white">
+              <option value="">اختر النوع</option>
+              <option value="تجاري">🏢 تجاري</option>
+              <option value="سكني">🏠 سكني</option>
+              <option value="صناعي">🏭 صناعي</option>
+              <option value="حكومي">🏛️ حكومي</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">الموقع</label>
+            <input id="proj-location" type="text" placeholder="مثال: رام الله"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">الخدمة المنفذة</label>
+            <input id="proj-service" type="text" placeholder="مثال: كاميرات مراقبة + إنذار"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">عدد الكاميرات</label>
+            <input id="proj-cameras" type="text" placeholder="مثال: 24 كاميرا"
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="text-sm font-bold text-gray-600 mb-1 block">صورة المشروع</label>
+            <div class="flex gap-2 mb-2">
+              <button type="button" onclick="document.getElementById('proj-image-gallery').click()"
+                class="flex-1 border-2 border-gray-200 rounded-2xl px-3 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1">
+                🖼️ من المعرض
+              </button>
+              <button type="button" onclick="document.getElementById('proj-image-camera').click()"
+                class="flex-1 border-2 rounded-2xl px-3 py-2.5 text-sm font-bold transition flex items-center justify-center gap-1"
+                style="border-color:#F5A623;color:#F47B20">
+                📷 تصوير
+              </button>
+            </div>
+            <input id="proj-image-gallery" type="file" accept="image/*" class="hidden" onchange="handleProjImageSelect(this)" />
+            <input id="proj-image-camera" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleProjImageSelect(this)" />
+            <input id="proj-image-url" type="hidden" />
+            <div id="proj-image-preview" class="hidden mt-2 relative">
+              <img id="proj-image-preview-img" src="" class="w-full h-36 object-cover rounded-2xl border-2" style="border-color:#F47B20" />
+              <button type="button" onclick="clearProjImagePreview()"
+                class="absolute top-2 left-2 bg-red-500 text-white rounded-full w-7 h-7 text-xs font-black flex items-center justify-center">✕</button>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-sm font-bold text-gray-600 mb-1 block">وصف المشروع</label>
+            <textarea id="proj-desc" rows="3" placeholder="وصف تفصيلي عن المشروع..."
+              class="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none transition resize-none"></textarea>
+          </div>
+        </div>
+        <p id="proj-error" class="text-red-500 text-sm mb-3 hidden font-bold"></p>
+        <div class="flex gap-3">
+          <button onclick="saveProject()"
+            class="flex-1 gradient-bg text-white font-black py-3 rounded-2xl transition hover:opacity-90"
+            style="box-shadow:0 4px 15px rgba(244,123,32,0.3)">
+            💾 حفظ المشروع
+          </button>
+          <button onclick="resetProjectForm()"
+            class="px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-2xl transition">
+            إلغاء
+          </button>
+        </div>
+      </div>
+
+      <!-- PROJECTS LIST -->
+      <div class="bg-white rounded-3xl p-6 border border-gray-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04)">
+        <h2 class="text-xl font-black text-gray-800 mb-5">🏗️ جميع المشاريع</h2>
+        <div id="projects-list" class="space-y-3"></div>
+        <div id="projects-loading" class="text-center py-10 text-gray-400">
           <div class="inline-block w-8 h-8 border-2 border-orange-200 border-t-orange-500 rounded-full spin mb-2"></div>
           <p>جاري التحميل...</p>
         </div>
@@ -547,13 +645,14 @@
 
   // ====== TABS ======
   function showTab(tab) {
-    ['products','categories'].forEach(t => {
+    ['products','categories','projects'].forEach(t => {
       document.getElementById(`tab-${t}-content`).classList.add('hidden');
       document.getElementById(`tab-${t}`).className = 'tab-btn px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-600 border-2 border-gray-200 transition';
     });
     document.getElementById(`tab-${tab}-content`).classList.remove('hidden');
     document.getElementById(`tab-${tab}`).className = 'tab-btn tab-active px-6 py-2.5 rounded-xl font-bold text-sm transition';
     if (tab === 'categories') loadCategoriesList();
+    if (tab === 'projects') loadProjectsList();
   }
 
   // ====== PRODUCTS ======
@@ -794,6 +893,140 @@
     loadCategoriesList();
     loadProducts();
     loadStats();
+  }
+
+  // ====== PROJECTS IMAGE ======
+  let selectedProjFile = null;
+
+  async function handleProjImageSelect(input) {
+    const file = input.files[0]; if (!file) return;
+    const compressed = await compressImage(file);
+    selectedProjFile = compressed;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('proj-image-preview-img').src = e.target.result;
+      document.getElementById('proj-image-preview').classList.remove('hidden');
+    };
+    reader.readAsDataURL(compressed);
+  }
+
+  function clearProjImagePreview() {
+    selectedProjFile = null;
+    document.getElementById('proj-image-gallery').value = '';
+    document.getElementById('proj-image-camera').value = '';
+    document.getElementById('proj-image-preview').classList.add('hidden');
+    document.getElementById('proj-image-url').value = '';
+  }
+
+  // ====== PROJECTS CRUD ======
+  async function loadProjectsList() {
+    document.getElementById('projects-loading').classList.remove('hidden');
+    const projects = await sbFetch('projects', '?order=created_at.desc');
+    document.getElementById('projects-loading').classList.add('hidden');
+    const container = document.getElementById('projects-list');
+    if (!projects?.length) {
+      container.innerHTML = '<p class="text-center text-gray-400 py-10">لا توجد مشاريع بعد</p>';
+      return;
+    }
+    const typeIcons = { 'تجاري':'🏢','سكني':'🏠','صناعي':'🏭','حكومي':'🏛️' };
+    container.innerHTML = projects.map(p => `
+      <div class="flex items-center gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100 hover:border-orange-200 transition">
+        ${p.image_url
+          ? `<img src="${p.image_url}" class="w-16 h-16 rounded-xl object-cover border border-gray-200 flex-shrink-0" />`
+          : `<div class="w-16 h-16 rounded-xl bg-orange-50 flex items-center justify-center text-2xl flex-shrink-0">${typeIcons[p.project_type] || '🏗️'}</div>`}
+        <div class="flex-1 min-w-0">
+          <p class="font-black text-gray-800">${p.title}</p>
+          <div class="flex gap-2 mt-1 flex-wrap">
+            ${p.project_type ? `<span class="text-xs font-bold px-2 py-1 rounded-lg bg-orange-50 text-orange-600">${typeIcons[p.project_type] || ''} ${p.project_type}</span>` : ''}
+            ${p.location ? `<span class="text-xs font-bold px-2 py-1 rounded-lg bg-gray-100 text-gray-600">📍 ${p.location}</span>` : ''}
+            ${p.cameras_count ? `<span class="text-xs font-bold px-2 py-1 rounded-lg bg-gray-100 text-gray-600">📷 ${p.cameras_count}</span>` : ''}
+          </div>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+          <button onclick='editProject(${JSON.stringify(p).replace(/'/g,"&#39;")})'
+            class="text-sm font-bold px-3 py-1.5 rounded-xl transition"
+            style="background:rgba(244,123,32,0.08);color:#F47B20">✏️ تعديل</button>
+          <button onclick="deleteProject(${p.id})"
+            class="text-sm font-bold px-3 py-1.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition">🗑️ حذف</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function saveProject() {
+    const title = document.getElementById('proj-title').value.trim();
+    const type = document.getElementById('proj-type').value;
+    const location = document.getElementById('proj-location').value.trim();
+    const service = document.getElementById('proj-service').value.trim();
+    const cameras = document.getElementById('proj-cameras').value.trim();
+    const desc = document.getElementById('proj-desc').value.trim();
+    const editId = document.getElementById('edit-project-id').value;
+    const errEl = document.getElementById('proj-error');
+
+    if (!title || !type) {
+      errEl.textContent = '⚠️ العنوان ونوع المشروع مطلوبان!';
+      errEl.classList.remove('hidden'); return;
+    }
+    errEl.classList.add('hidden');
+
+    let imageUrl = document.getElementById('proj-image-url').value;
+    if (selectedProjFile) {
+      try { imageUrl = await uploadImage(selectedProjFile, 'project-images'); }
+      catch(e) { errEl.textContent = '⚠️ فشل رفع الصورة'; errEl.classList.remove('hidden'); return; }
+    }
+
+    const data = { title, project_type: type, location, service, cameras_count: cameras, description: desc, image_url: imageUrl };
+
+    if (editId) {
+      await sbFetch('projects', `?id=eq.${editId}`, 'PATCH', data);
+    } else {
+      await sbFetch('projects', '', 'POST', data);
+    }
+
+    resetProjectForm();
+    loadProjectsList();
+  }
+
+  function editProject(p) {
+    document.getElementById('proj-form-title').textContent = '✏️ تعديل المشروع';
+    document.getElementById('edit-project-id').value = p.id;
+    document.getElementById('proj-title').value = p.title || '';
+    document.getElementById('proj-type').value = p.project_type || '';
+    document.getElementById('proj-location').value = p.location || '';
+    document.getElementById('proj-service').value = p.service || '';
+    document.getElementById('proj-cameras').value = p.cameras_count || '';
+    document.getElementById('proj-desc').value = p.description || '';
+    document.getElementById('proj-image-url').value = p.image_url || '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function deleteProject(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا المشروع؟')) return;
+    const project = await sbFetch('projects', `?id=eq.${id}&select=image_url`);
+    if (project?.[0]?.image_url) {
+      try {
+        const fileName = project[0].image_url.split('/').pop();
+        await fetch(`${SUPABASE_URL}/storage/v1/object/project-images/${fileName}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authToken}` }
+        });
+      } catch(e) { console.warn('تعذر حذف الصورة:', e); }
+    }
+    await sbFetch('projects', `?id=eq.${id}`, 'DELETE');
+    loadProjectsList();
+  }
+
+  function resetProjectForm() {
+    document.getElementById('proj-form-title').textContent = '➕ إضافة مشروع جديد';
+    document.getElementById('edit-project-id').value = '';
+    document.getElementById('proj-title').value = '';
+    document.getElementById('proj-type').value = '';
+    document.getElementById('proj-location').value = '';
+    document.getElementById('proj-service').value = '';
+    document.getElementById('proj-cameras').value = '';
+    document.getElementById('proj-desc').value = '';
+    document.getElementById('proj-image-url').value = '';
+    clearProjImagePreview();
+    document.getElementById('proj-error').classList.add('hidden');
   }
 </script>
 </body>
