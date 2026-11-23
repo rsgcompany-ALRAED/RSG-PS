@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إعلانات الرائد RSG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #111;
+      cursor: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #stage { position: relative; width: 100%; height: 100%; }
+
+    /* طبقتان فوق بعض للانتقال الناعم بين الصور */
+    .layer {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .layer.on { opacity: 1; }
+
+    /* بديل لما ما يكون في إعلانات فعّالة */
+    #fallback {
+      position: absolute; inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3vmin;
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+    }
+    #fallback.on { display: flex; }
+    #fallback .logo {
+      width: 22vmin; height: 22vmin;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #F47B20, #F5A623);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 900; font-size: 11vmin;
+      box-shadow: 0 0 6vmin rgba(244,123,32,0.35);
+    }
+    #fallback .name { color: #fff; font-weight: 900; font-size: 6vmin; }
+    #fallback .sub  { color: #F47B20; font-weight: 700; font-size: 3.2vmin; }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <img id="layer-a" class="layer" alt="" />
+    <img id="layer-b" class="layer" alt="" />
+    <div id="fallback">
+      <div class="logo">ر</div>
+      <div class="name">الرائد RSG</div>
+      <div class="sub">للإلكترونيات والتكنولوجيا</div>
+    </div>
+  </div>
+
+<script>
+  // =============================================
+  // إعدادات Supabase
+  // =============================================
+  const SUPABASE_URL = 'https://ydzphvflmnrqsiidhvmt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_NCUsnmCoNad3aao1NKelJA__gkGnvIf';
+  const REFRESH_MS   = 5 * 60 * 1000;   // تحديث القائمة كل 5 دقائق
+  const CACHE_KEY    = 'rsg_ads_cache';
+  // =============================================
+
+  const layers   = [document.getElementById('layer-a'), document.getElementById('layer-b')];
+  const fallback = document.getElementById('fallback');
+
+  let ads = [];          // [{image_url, duration}]
+  let index = -1;        // الإعلان الحالي
+  let front = 0;         // أي طبقة ظاهرة حالياً
+  let timer = null;
+
+  function sameList(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+
+  function preload(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload  = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  }
+
+  async function fetchAds() {
+    const url = `${SUPABASE_URL}/rest/v1/ads`
+      + `?is_active=eq.true&select=image_url,duration&order=sort_order.asc,id.asc`;
+    const res = await fetch(url, { headers: { apikey: SUPABASE_KEY } });
+    if (!res.ok) throw new Error('fetch failed');
+    return res.json();
+  }
+
+  function saveCache(list) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+  function loadCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch (e) { return []; }
+  }
+
+  async function showNext() {
+    clearTimeout(timer);
+
+    if (!ads.length) {
+      layers.forEach(l => l.classList.remove('on'));
+      fallback.classList.add('on');
+      index = -1;
+      return;
+    }
+    fallback.classList.remove('on');
+
+    // ابحث عن أول صورة تتحمّل (نتخطى المعطوبة)
+    for (let tries = 0; tries < ads.length; tries++) {
+      index = (index + 1) % ads.length;
+      const ad = ads[index];
+      if (await preload(ad.image_url)) {
+        const back = 1 - front;
+        layers[back].src = ad.image_url;
+        layers[back].classList.add('on');
+        layers[front].classList.remove('on');
+        front = back;
+
+        // لو في إعلان واحد بس، ما في داعي للتبديل
+        if (ads.length > 1) {
+          timer = setTimeout(showNext, (ad.duration || 10) * 1000);
+        }
+        return;
+      }
+    }
+    // كل الصور فشلت: جرّب من جديد بعد شوي
+    timer = setTimeout(showNext, 30000);
+  }
+
+  async function refresh() {
+    try {
+      const fresh = await fetchAds();
+      saveCache(fresh);
+      if (!sameList(fresh, ads)) {
+        const wasEmpty = ads.length === 0;
+        ads = fresh;
+        if (wasEmpty || ads.length <= 1) { index = -1; showNext(); }
+        else if (index >= ads.length) { index = -1; }
+      }
+    } catch (e) {
+      // انقطاع نت: نكمّل بآخر قائمة موجودة
+    }
+  }
+
+  // البداية: اعرض آخر قائمة محفوظة فوراً، بعدين حدّث من السيرفر
+  ads = loadCache();
+  showNext();
+  refresh();
+  setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
